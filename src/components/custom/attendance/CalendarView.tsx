@@ -2,7 +2,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { eachDayOfInterval, endOfMonth, getDay } from "date-fns";
 import NoContentFound from "../NoContentFound";
-import { RefreshCcw } from "lucide-react";
 
 const CALENDAR_TYPES = {
     ALL: "General Semester",
@@ -48,7 +47,7 @@ function isInstructionalEvent(e) {
     return false;
 }
 
-export default function CalendarView({ calendars, calendarType, handleCalendarFetch }) {
+export default function CalendarView({ calendars, calendarType }) {
     const safeCalendars = useMemo(() => {
         if (!calendars) return [];
         if (Array.isArray(calendars)) return calendars;
@@ -122,9 +121,7 @@ export default function CalendarView({ calendars, calendarType, handleCalendarFe
     return (
         <div className="flex flex-col gap-4">
             <h1 className="text-lg font-semibold mb-3 text-center text-gray-800 dark:text-gray-100 midnight:text-gray-100">
-                Academic Calendar ({CALENDAR_TYPES[calendarType || "ALL"]}) <button onClick={() => handleCalendarFetch(calendarType || "ALL")} className="mt-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
-                    <RefreshCcw className={`w-4 h-4`} />
-                </button>
+                Academic Calendar ({CALENDAR_TYPES[calendarType || "ALL"]})
             </h1>
             <div className="flex gap-2 mb-3 justify-center flex-wrap">
                 {safeCalendars.map((calendar, idx) => (

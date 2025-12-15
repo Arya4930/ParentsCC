@@ -20,7 +20,6 @@ export default function LoginPage() {
   const [marksData, setMarksData] = useState<object>({});
   const [GradesData, setGradesData] = useState<object>({});
   const [AllGradesData, setAllGradesData] = useState<AllGradesRes>({});
-  const [hostelData, sethostelData] = useState<object>({});
   const [Calender, setCalender] = useState<object>({});
   const [activeDay, setActiveDay] = useState<string>("");
   const [isReloading, setIsReloading] = useState<boolean>(false);
@@ -72,7 +71,6 @@ export default function LoginPage() {
     const storedAllGrades = localStorage.getItem("allGrades");
     const storedUsername = localStorage.getItem("username");
     const storedPassword = localStorage.getItem("password");
-    const storedHoste = localStorage.getItem("hostel");
     const calendar = localStorage.getItem("calender");
     const calendarType = localStorage.getItem("calendarType");
     const storedCurrSemesterID = localStorage.getItem("currSemesterID");
@@ -86,7 +84,6 @@ export default function LoginPage() {
     if (storedPassword) setPassword(storedPassword);
     if (storedGrades) setGradesData(JSON.parse(storedGrades));
     if (storedAllGrades) setAllGradesData(JSON.parse(storedAllGrades));
-    if (storedHoste) sethostelData(JSON.parse(storedHoste));
     if (calendar) setCalender(JSON.parse(calendar));
     if (calendarType) setCalenderType(calendarType);
     if (storedCurrSemesterID) setCurrSemesterID(storedCurrSemesterID);
@@ -153,7 +150,6 @@ export default function LoginPage() {
         attRes,
         marksRes,
         gradesRes,
-        HostelRes,
         calenderRes,
         allGradesRes
       ] = await Promise.all([
@@ -186,16 +182,6 @@ export default function LoginPage() {
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Grades fetched");
-          setProgressBar(prev => prev + 5);
-          return j;
-        }),
-        fetch(`${API_BASE}/api/hostel`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml }),
-        }).then(async r => {
-          const j = await r.json();
-          setMessage(prev => prev + "\n✅ Hostel details fetched");
           setProgressBar(prev => prev + 5);
           return j;
         }),
@@ -233,14 +219,12 @@ export default function LoginPage() {
       setMarksData(marksRes);
       setGradesData(gradesRes);
       setAllGradesData(allGradesRes);
-      sethostelData(HostelRes);
       setCalender(calenderRes);
 
       localStorage.setItem("attendance", JSON.stringify(attRes));
       localStorage.setItem("marks", JSON.stringify(marksRes));
       localStorage.setItem("grades", JSON.stringify(gradesRes));
       localStorage.setItem("allGrades", JSON.stringify(allGradesRes));
-      localStorage.setItem("hostel", JSON.stringify(HostelRes));
       localStorage.setItem("calender", JSON.stringify(calenderRes));
 
       setMessage(prev => prev + "\n✅ All data loaded successfully!");
@@ -257,7 +241,7 @@ export default function LoginPage() {
   };
 
   // --- Event Handlers ---
-  const handleReloadRequest = async () => {
+  const handleReloadRequest = async (currSemesterID = config.semesterIDs[config.semesterIDs.length - 2]) => {
     setIsReloading(true);
     try {
       const { cookies, dashboardHtml } = await loginToVTOP();
@@ -266,7 +250,10 @@ export default function LoginPage() {
 
       const [
         attRes,
-        marksRes
+        marksRes,
+        gradesRes,
+        calenderRes,
+        allGradesRes
       ] = await Promise.all([
         fetch(`${API_BASE}/api/attendance`, {
           method: "POST",
@@ -275,9 +262,10 @@ export default function LoginPage() {
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Attendance fetched");
-          setProgressBar(prev => prev + 20);
+          setProgressBar(prev => prev + 10);
           return j;
         }),
+
         fetch(`${API_BASE}/api/marks`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -285,16 +273,61 @@ export default function LoginPage() {
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Marks fetched");
-          setProgressBar(prev => prev + 20);
+          setProgressBar(prev => prev + 5);
           return j;
-        })
+        }),
+
+        fetch(`${API_BASE}/api/grades`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+        }).then(async r => {
+          const j = await r.json();
+          setMessage(prev => prev + "\n✅ Grades fetched");
+          setProgressBar(prev => prev + 5);
+          return j;
+        }),
+
+        fetch(`${API_BASE}/api/calendar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cookies: cookies,
+            dashboardHtml: dashboardHtml,
+            type: calendarType || "ALL",
+            semesterId: currSemesterID
+          }),
+        }).then(async r => {
+          const j = await r.json();
+          setMessage(prev => prev + "\n✅ Calendar fetched");
+          setProgressBar(prev => prev + 5);
+          return j;
+        }),
+        fetch(`${API_BASE}/api/all-grades`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml }),
+        }).then(async r => {
+          const j = await r.json();
+          setMessage(prev => prev + "\n✅ All grades fetched");
+          setProgressBar(prev => prev + 10);
+          return j;
+        }),
       ]);
+
+      setMessage(prev => prev + "\nFinalizing and saving data...");
 
       setAttendanceAndOD(attRes);
       setMarksData(marksRes);
+      setGradesData(gradesRes);
+      setAllGradesData(allGradesRes);
+      setCalender(calenderRes);
 
       localStorage.setItem("attendance", JSON.stringify(attRes));
       localStorage.setItem("marks", JSON.stringify(marksRes));
+      localStorage.setItem("grades", JSON.stringify(gradesRes));
+      localStorage.setItem("allGrades", JSON.stringify(allGradesRes));
+      localStorage.setItem("calender", JSON.stringify(calenderRes));
 
       setMessage(prev => prev + "\n✅ All data loaded successfully!");
       setProgressBar(100);
@@ -432,22 +465,11 @@ export default function LoginPage() {
             marksData={marksData}
             activeSubTab={activeSubTab}
             setActiveSubTab={setActiveSubTab}
-            hostelData={hostelData}
-            HostelActiveSubTab={HostelActiveSubTab}
-            setHostelActiveSubTab={setHostelActiveSubTab}
             activeAttendanceSubTab={activeAttendanceSubTab}
             setActiveAttendanceSubTab={setActiveAttendanceSubTab}
             calendarData={Calender}
             calendarType={calendarType}
-            setCalender={setCalender}
-            setCalenderType={setCalenderType}
             setIsReloading={setIsReloading}
-            setProgressBar={setProgressBar}
-            setMessage={setMessage}
-            loginToVTOP={loginToVTOP}
-            setAllGradesData={setAllGradesData}
-            sethostelData={sethostelData}
-            setGradesData={setGradesData}
             currSemesterID={currSemesterID}
             setCurrSemesterID={setCurrSemesterID}
             handleLogin={handleLogin}

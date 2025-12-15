@@ -5,15 +5,11 @@ import GradesModal from "./Exams/GradesModal";
 import AttendanceTabs from "./attendance/attendanceTabs";
 import ExamsSubTabs from "./Exams/ExamSubsTab";
 import MarksDisplay from "./Exams/marksDislay";
-import HostelSubTabs from "./Hostel/HostelSubsTab";
-import MessDisplay from "./Hostel/messDisplay";
 import AttendanceSubTabs from "./attendance/AttendanceSubsTabs";
 import CalendarView from "./attendance/CalendarView";
 import { useState } from "react";
 import { useRef } from "react";
-import LeaveDisplay from "./Hostel/LeaveDisplay";
 import AllGradesDisplay from "./Exams/AllGradesDisplay";
-import { API_BASE } from "./Main";
 
 export default function DashboardContent({
   activeTab,
@@ -31,22 +27,11 @@ export default function DashboardContent({
   marksData,
   activeSubTab,
   setActiveSubTab,
-  hostelData,
-  HostelActiveSubTab,
-  setHostelActiveSubTab,
   activeAttendanceSubTab,
   setActiveAttendanceSubTab,
   calendarData,
   calendarType,
-  setCalender,
-  setCalenderType,
   setIsReloading,
-  setProgressBar,
-  setMessage,
-  loginToVTOP,
-  setAllGradesData,
-  sethostelData,
-  setGradesData,
   currSemesterID,
   setCurrSemesterID,
   handleLogin,
@@ -57,7 +42,7 @@ export default function DashboardContent({
   const touchEndY = useRef(0);
   const hasMoved = useRef(false);
 
-  const tabsOrder = ["attendance", "exams", "hostel"];
+  const tabsOrder = ["attendance", "exams"];
 
   const handleTouchStart = (e) => {
     const touch = e.touches[0];
@@ -101,118 +86,6 @@ export default function DashboardContent({
     }
   };
 
-  const handleAllGradesFetch = async () => {
-    setIsReloading(true);
-    try {
-      const { cookies, dashboardHtml } = await loginToVTOP();
-
-      const AllGradesRes = await fetch(`${API_BASE}/api/all-grades`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml }),
-      });
-
-      const AllGradesData = await AllGradesRes.json();
-      setProgressBar((prev) => prev + 40);
-
-      setAllGradesData(AllGradesData);
-      localStorage.setItem("allGradesData", JSON.stringify(AllGradesData));
-
-      setMessage((prev) => prev + "\n✅ All grades reloaded successfully!");
-      setProgressBar(100);
-      setIsReloading(false);
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ All Grades fetch failed, check console.");
-      setProgressBar(0);
-    }
-  };
-
-  const handleCalendarFetch = async (FncalendarType) => {
-    setIsReloading(true);
-    try {
-      const { cookies, dashboardHtml } = await loginToVTOP();
-
-      const calenderRes = await fetch(`${API_BASE}/api/calendar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cookies: cookies,
-          dashboardHtml: dashboardHtml,
-          type: FncalendarType || "ALL",
-          semesterId: currSemesterID
-        }),
-      });
-
-      const CalenderRes = await calenderRes.json();
-      setProgressBar((prev) => prev + 40);
-
-      setCalender(CalenderRes);
-      setCalenderType(FncalendarType);
-      localStorage.setItem("calender", JSON.stringify(CalenderRes));
-      localStorage.setItem("calendarType", FncalendarType);
-
-      setMessage((prev) => prev + "\n✅ Calendar reloaded successfully!");
-      setProgressBar(100);
-      setIsReloading(false);
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Calendar fetch failed, check console.");
-      setProgressBar(0);
-    }
-  };
-
-  const handleFetchGrades = async () => {
-    setIsReloading(true);
-    try {
-      const { cookies, dashboardHtml } = await loginToVTOP();
-
-      const gradesRes = await fetch(`${API_BASE}/api/grades`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cookies, dashboardHtml, semesterId: currSemesterID }),
-      });
-
-      const gradesData = await gradesRes.json();
-      setProgressBar((prev) => prev + 40);
-
-      setGradesData(gradesData);
-      localStorage.setItem("grades", JSON.stringify(gradesData));
-
-      setMessage((prev) => prev + "\n✅ Grades reloaded successfully!");
-      setProgressBar(100);
-      setIsReloading(false);
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Grades fetch failed, check console.");
-      setProgressBar(0);
-    }
-  };
-
-  const handleHostelDetailsFetch = async () => {
-    setIsReloading(true);
-    try {
-      const { cookies, dashboardHtml } = await loginToVTOP();
-
-      const HostelRes = await fetch(`${API_BASE}/api/hostel`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml }),
-      });
-      const HostelData = await HostelRes.json();
-      setProgressBar((prev) => prev + 40);
-      sethostelData(HostelData);
-      localStorage.setItem("hostelData", JSON.stringify(HostelData));
-      setMessage((prev) => prev + "\n✅ Hostel details reloaded successfully!");
-      setProgressBar(100);
-      setIsReloading(false);
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Hostel details fetch failed, check console.");
-      setProgressBar(0);
-    }
-  };
-
   return (
     <div
       className="w-full max-w-md md:max-w-full mx-auto overflow-hidden"
@@ -243,7 +116,6 @@ export default function DashboardContent({
             GradesData={GradesData}
             marksData={marksData}
             onClose={() => setGradesDisplayIsOpen(false)}
-            handleFetchGrades={handleFetchGrades}
             attendance={attendanceData.attendance}
           />
         )}
@@ -260,7 +132,7 @@ export default function DashboardContent({
                 {!calendarType && (
                   <CalendarTabWrapper
                     calendarType={calendarType}
-                    handleCalendarFetch={handleCalendarFetch}
+                    handleCalendarFetch={handleReloadRequest}
                   />
                 )}
                 <AttendanceTabs
@@ -277,11 +149,10 @@ export default function DashboardContent({
                 <CalendarView
                   calendars={calendarData.calendars}
                   calendarType={calendarType}
-                  handleCalendarFetch={handleCalendarFetch}
                 />
                 <CalendarTabWrapper
                   calendarType={calendarType}
-                  handleCalendarFetch={handleCalendarFetch}
+                  handleCalendarFetch={handleReloadRequest}
                 />
               </>
             )}
@@ -295,18 +166,7 @@ export default function DashboardContent({
               setActiveSubTab={setActiveSubTab}
             />
             {activeSubTab === "marks" && <MarksDisplay data={marksData} />}
-            {activeSubTab === "grades" && <AllGradesDisplay data={allGradesData} handleAllGradesFetch={handleAllGradesFetch} />}
-          </div>
-        )}
-
-        {activeTab === "hostel" && (
-          <div className="animate-fadeIn">
-            <HostelSubTabs
-              HostelActiveSubTab={HostelActiveSubTab}
-              setHostelActiveSubTab={setHostelActiveSubTab}
-            />
-            {HostelActiveSubTab === "mess" && <MessDisplay hostelData={hostelData} handleHostelDetailsFetch={handleHostelDetailsFetch} />}
-            {HostelActiveSubTab === "leave" && <LeaveDisplay leaveData={hostelData.leaveHistory} handleHostelDetailsFetch={handleHostelDetailsFetch} />}
+            {activeSubTab === "grades" && <AllGradesDisplay data={allGradesData} />}
           </div>
         )}
       </div>

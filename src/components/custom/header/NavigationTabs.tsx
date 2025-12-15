@@ -61,14 +61,6 @@ export default function NavigationTabs({
       </button>
 
       <button
-        onClick={() => setActiveTab("hostel")}
-        className={`${tabBase} ${activeTab === "hostel" ? tabActive : tabInactive
-          }`}
-      >
-        Hostel
-      </button>
-
-      <button
         onClick={handleReloadClick}
         className="w-12 flex items-center justify-center bg-blue-500 hover:cursor-pointer text-white text-sm font-medium hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 midnight:bg-blue-800 transition-colors"
       >

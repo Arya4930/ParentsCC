@@ -22,7 +22,7 @@ export default function StatsCards({
 
 
   const cardBase =
-    "cursor-pointer p-6 rounded-2xl shadow hover:shadow-lg transition flex-shrink-0 snap-start w-[calc(50%-8px)] md:w-[calc(25%-12px)] flex flex-col items-center justify-center text-center";
+    "cursor-pointer p-6 rounded-2xl shadow hover:shadow-lg transition flex-shrink-0 snap-start w-[calc(50%-8px)] md:w-[calc(33%-12px)] flex flex-col items-center justify-center text-center";
 
   return (
     <div data-scrollable className="overflow-x-auto snap-x snap-mandatory ml-4 mr-4">
