@@ -35,6 +35,7 @@ export default function DashboardContent({
   currSemesterID,
   setCurrSemesterID,
   handleLogin,
+  setCalenderType
 }) {
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -133,6 +134,8 @@ export default function DashboardContent({
                   <CalendarTabWrapper
                     calendarType={calendarType}
                     handleCalendarFetch={handleReloadRequest}
+                    currSemesterID={currSemesterID}
+                    setCalenderType={setCalenderType}
                   />
                 )}
                 <AttendanceTabs
@@ -153,6 +156,8 @@ export default function DashboardContent({
                 <CalendarTabWrapper
                   calendarType={calendarType}
                   handleCalendarFetch={handleReloadRequest}
+                  currSemesterID={currSemesterID}
+                  setCalenderType={setCalenderType}
                 />
               </>
             )}
@@ -174,7 +179,7 @@ export default function DashboardContent({
   );
 }
 
-function CalendarTabWrapper({ calendarType, handleCalendarFetch }) {
+function CalendarTabWrapper({ calendarType, handleCalendarFetch, currSemesterID, setCalenderType }) {
   const CALENDAR_TYPES = {
     ALL: "General Semester",
     ALL02: "General Flexible",
@@ -189,7 +194,9 @@ function CalendarTabWrapper({ calendarType, handleCalendarFetch }) {
   const [selectedType, setSelectedType] = useState(calendarType || "ALL");
 
   function handleSubmitCalendarType() {
-    handleCalendarFetch(selectedType);
+    handleCalendarFetch(currSemesterID, selectedType);
+    setCalenderType(selectedType);
+    localStorage.setItem("calendarType", selectedType);
   }
 
   return (

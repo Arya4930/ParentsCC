@@ -241,8 +241,9 @@ export default function LoginPage() {
   };
 
   // --- Event Handlers ---
-  const handleReloadRequest = async (currSemesterID = config.semesterIDs[config.semesterIDs.length - 2]) => {
+  const handleReloadRequest = async (currSemesterID = config.semesterIDs[config.semesterIDs.length - 2], calendarType = "ALL") => {
     setIsReloading(true);
+    console.log(currSemesterID)
     try {
       const { cookies, dashboardHtml } = await loginToVTOP();
       localStorage.setItem("username", username);
@@ -473,6 +474,7 @@ export default function LoginPage() {
             currSemesterID={currSemesterID}
             setCurrSemesterID={setCurrSemesterID}
             handleLogin={handleLogin}
+            setCalenderType={setCalenderType}
           />
         </>
       )}
