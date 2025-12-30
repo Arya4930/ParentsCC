@@ -1,6 +1,6 @@
 # ParentsCC
 
-**Live site:** [uni-cc.vercel.app](https://uni-cc.vercel.app)
+**Live site:** [https://parentscc.netlify.app/](https://parentscc.netlify.app/)
 
 **Repository:** [Arya4930/ParentsCC](https://github.com/Arya4930/ParentsCC)
 

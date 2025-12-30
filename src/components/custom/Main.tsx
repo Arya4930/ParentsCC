@@ -9,7 +9,7 @@ import config from '../../app/config.json'
 import { attendanceRes, ODListItem, ODListRaw } from "@/types/data/attendance";
 import { AllGradesRes } from "@/types/data/allgrades";
 
-export const API_BASE = "https://uniccapi3.aryaslocalserver.online";
+export const API_BASE = "https://api.uni-cc.site";
 
 export default function LoginPage() {
   // --- State Management ---
