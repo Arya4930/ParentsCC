@@ -95,26 +95,12 @@ export default function LoginPage() {
     try {
       setProgressBar(10);
       setMessage("Logging in and fetching data...");
-
-      const captchaRes = await fetch(`${API_BASE}/api/captcha`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const { captchaBase64, cookies, csrf, error } = await captchaRes.json();
-      if (error) throw new Error("Failed to get CAPTCHA: " + error);
-
-      const captcha = await solveCaptchaClient(captchaBase64);
-
       const loginRes = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username,
-          password,
-          captcha,
-          cookies,
-          csrf,
+          password
         }),
       });
 
@@ -125,7 +111,7 @@ export default function LoginPage() {
         return await loginToVTOP(true);
       }
 
-      if (!data.success || !data.dashboardHtml)
+      if (!data.success || !data.authorizedID || !data.cookies)
         throw new Error(data.message || "Login failed.");
 
       setMessage((prev) => prev + "\n✅ Login successful");
@@ -133,7 +119,8 @@ export default function LoginPage() {
 
       return {
         cookies: data.cookies,
-        dashboardHtml: data.dashboardHtml,
+        authorizedID: data.authorizedID,
+        csrf: data.csrf,
       };
     } catch (err: any) {
       throw err;
@@ -142,7 +129,7 @@ export default function LoginPage() {
 
   const handleLogin = async (currSemesterID = config.semesterIDs[config.semesterIDs.length - 2]) => {
     try {
-      const { cookies, dashboardHtml } = await loginToVTOP();
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
       localStorage.setItem("username", username);
       localStorage.setItem("password", password);
 
@@ -156,7 +143,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/attendance`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Attendance fetched");
@@ -167,7 +154,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/marks`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Marks fetched");
@@ -178,7 +165,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/grades`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Grades fetched");
@@ -191,7 +178,8 @@ export default function LoginPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             cookies: cookies,
-            dashboardHtml: dashboardHtml,
+            authorizedID,
+            csrf,
             type: calendarType || "ALL",
             semesterId: currSemesterID
           }),
@@ -204,7 +192,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/all-grades`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ All grades fetched");
@@ -245,7 +233,7 @@ export default function LoginPage() {
     setIsReloading(true);
     console.log(currSemesterID)
     try {
-      const { cookies, dashboardHtml } = await loginToVTOP();
+      const { cookies, authorizedID, csrf } = await loginToVTOP();
       localStorage.setItem("username", username);
       localStorage.setItem("password", password);
 
@@ -259,7 +247,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/attendance`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Attendance fetched");
@@ -270,7 +258,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/marks`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Marks fetched");
@@ -281,7 +269,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/grades`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml, semesterId: currSemesterID }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Grades fetched");
@@ -294,7 +282,8 @@ export default function LoginPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             cookies: cookies,
-            dashboardHtml: dashboardHtml,
+            authorizedID,
+            csrf,
             type: calendarType || "ALL",
             semesterId: currSemesterID
           }),
@@ -307,7 +296,7 @@ export default function LoginPage() {
         fetch(`${API_BASE}/api/all-grades`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, dashboardHtml: dashboardHtml }),
+          body: JSON.stringify({ cookies: cookies, authorizedID, csrf }),
         }).then(async r => {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ All grades fetched");
