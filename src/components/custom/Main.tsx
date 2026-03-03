@@ -4,9 +4,8 @@ import { ReloadModal } from "./reloadModel";
 import LoginForm from "./loginForm";
 import DashboardContent from "./Dashboard";
 import Footer from "./footer/Footer";
-import { solveCaptchaClient } from "@/lib/solveCaptcha";
 import config from '../../app/config.json'
-import { attendanceRes, ODListItem, ODListRaw } from "@/types/data/attendance";
+import { attendanceRes } from "@/types/data/attendance";
 import { AllGradesRes } from "@/types/data/allgrades";
 
 export const API_BASE = "https://api.uni-cc.site";
@@ -135,7 +134,6 @@ export default function LoginPage() {
 
       const [
         attRes,
-        marksRes,
         gradesRes,
         calenderRes,
         allGradesRes
@@ -148,17 +146,6 @@ export default function LoginPage() {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Attendance fetched");
           setProgressBar(prev => prev + 10);
-          return j;
-        }),
-
-        fetch(`${API_BASE}/api/marks`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
-        }).then(async r => {
-          const j = await r.json();
-          setMessage(prev => prev + "\n✅ Marks fetched");
-          setProgressBar(prev => prev + 5);
           return j;
         }),
 
@@ -203,14 +190,16 @@ export default function LoginPage() {
 
       setMessage(prev => prev + "\nFinalizing and saving data...");
 
-      setAttendanceAndOD(attRes);
-      setMarksData(marksRes);
+      const { attendance, marks } = attRes;
+
+      setAttendanceAndOD(attendance);
+      setMarksData(marks);
       setGradesData(gradesRes);
       setAllGradesData(allGradesRes);
       setCalender(calenderRes);
 
-      localStorage.setItem("attendance", JSON.stringify(attRes));
-      localStorage.setItem("marks", JSON.stringify(marksRes));
+      localStorage.setItem("attendance", JSON.stringify(attendance));
+      localStorage.setItem("marks", JSON.stringify(marks));
       localStorage.setItem("grades", JSON.stringify(gradesRes));
       localStorage.setItem("allGrades", JSON.stringify(allGradesRes));
       localStorage.setItem("calender", JSON.stringify(calenderRes));
@@ -222,7 +211,7 @@ export default function LoginPage() {
       return true;
     } catch (err) {
       console.error(err);
-      setMessage(prev => prev + "\n❌ Login failed, check console.");
+      setMessage(prev => prev + "\n❌ Some error occured while fetching.");
       setProgressBar(0);
       throw err;
     }
@@ -239,7 +228,6 @@ export default function LoginPage() {
 
       const [
         attRes,
-        marksRes,
         gradesRes,
         calenderRes,
         allGradesRes
@@ -252,17 +240,6 @@ export default function LoginPage() {
           const j = await r.json();
           setMessage(prev => prev + "\n✅ Attendance fetched");
           setProgressBar(prev => prev + 10);
-          return j;
-        }),
-
-        fetch(`${API_BASE}/api/marks`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cookies: cookies, authorizedID, csrf, semesterId: currSemesterID }),
-        }).then(async r => {
-          const j = await r.json();
-          setMessage(prev => prev + "\n✅ Marks fetched");
-          setProgressBar(prev => prev + 5);
           return j;
         }),
 
@@ -307,14 +284,16 @@ export default function LoginPage() {
 
       setMessage(prev => prev + "\nFinalizing and saving data...");
 
-      setAttendanceAndOD(attRes);
-      setMarksData(marksRes);
+      const { attendance, marks } = attRes;
+
+      setAttendanceAndOD(attendance);
+      setMarksData(marks);
       setGradesData(gradesRes);
       setAllGradesData(allGradesRes);
       setCalender(calenderRes);
 
-      localStorage.setItem("attendance", JSON.stringify(attRes));
-      localStorage.setItem("marks", JSON.stringify(marksRes));
+      localStorage.setItem("attendance", JSON.stringify(attendance));
+      localStorage.setItem("marks", JSON.stringify(marks));
       localStorage.setItem("grades", JSON.stringify(gradesRes));
       localStorage.setItem("allGrades", JSON.stringify(allGradesRes));
       localStorage.setItem("calender", JSON.stringify(calenderRes));
